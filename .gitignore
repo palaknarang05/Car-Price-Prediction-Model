@@ -1,4 +1,12 @@
+# Virtual environment
 venv/
-__pycache__/venv/
+
+# Python cache
 __pycache__/
+*.pyc
+
+# Model files (ML artifacts)
 *.pkl
+
+# OS files
+.DS_Store
