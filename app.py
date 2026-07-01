@@ -1,12 +1,20 @@
 from flask import Flask, render_template, request
 import pandas as pd
 import pickle
+import os
+
+# Generate model if it doesn't exist
+if not os.path.exists("model.pkl") or not os.path.exists("columns.pkl"):
+    import train_model
 
 app = Flask(__name__)
 
 # Load model and feature columns
-model = pickle.load(open("model.pkl", "rb"))
-columns = pickle.load(open("columns.pkl", "rb"))
+with open("model.pkl", "rb") as f:
+    model = pickle.load(f)
+
+with open("columns.pkl", "rb") as f:
+    columns = pickle.load(f)
 
 
 @app.route("/")
@@ -25,7 +33,6 @@ def predict():
     owner = request.form["owner"]
     brand = request.form["brand"]
 
-    # Create DataFrame
     data = pd.DataFrame({
         "year": [year],
         "km_driven": [km_driven],
@@ -36,7 +43,6 @@ def predict():
         "owner": [owner]
     })
 
-    # One-Hot Encoding
     data = pd.get_dummies(
         data,
         columns=[
@@ -57,7 +63,6 @@ def predict():
     # Arrange columns in correct order
     data = data[columns]
 
-    # Prediction
     prediction = model.predict(data)[0]
 
     return render_template(
@@ -67,4 +72,5 @@ def predict():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
